@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="th" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/admin :: head(${productId == null} ? 'เพิ่มสินค้า' : 'แก้ไขสินค้า')}"></head>
+<body>
+<div class="admin-layout">
+  <nav th:replace="~{fragments/admin :: nav}"></nav>
+  <main class="admin-main">
+    <form method="post" enctype="multipart/form-data" class="stack-3" id="product-form"
+          th:action="${productId == null} ? @{/admin/products} : @{/admin/products/{id}(id=${productId})}" th:object="${form}">
+      <div class="page-head">
+        <div class="titles">
+          <a th:href="@{/admin/products}" class="caption">← กลับไปสินค้าทั้งหมด</a>
+          <h1 class="title" th:text="${productId == null} ? 'เพิ่มสินค้า' : 'แก้ไขสินค้า'">แก้ไขสินค้า</h1>
+        </div>
+        <div class="actions">
+          <a class="btn-ghost" th:href="@{/admin/products}">ยกเลิก</a>
+          <button class="btn" type="submit">บันทึกสินค้า</button>
+        </div>
+      </div>
+      <p th:replace="~{fragments/admin :: status}"></p>
+
+      <div class="row-wrap">
+        <div class="grow-3 stack-3">
+          <section class="panel" aria-labelledby="img-h">
+            <div class="stack-1">
+              <h2 id="img-h" class="sub">รูปสินค้า</h2>
+              <p class="caption">รูปแรกคือรูปหลักบนการ์ดสินค้า ใส่ได้หลายมุม (ไม่เกิน 12 รูป) รูปเหล่านี้จะขึ้นใน Preview แบบ Catalog</p>
+            </div>
+            <div class="img-list" data-img-list>
+              <div th:each="m, st : ${images}" class="img-item" data-img-item>
+                <input type="hidden" name="imageIds" th:value="${m.id}">
+                <div class="preview">
+                  <img th:src="${m.url}" th:alt="${m.altText}">
+                  <span class="badge solid main-tag" data-main-tag th:hidden="${!st.first}">รูปหลัก</span>
+                </div>
+                <span class="caption" th:text="${m.filename}">file</span>
+                <div class="tools">
+                  <button type="button" class="btn-ghost sm" data-img-move="-1" th:aria-label="'เลื่อนรูป ' + ${m.filename} + ' ไปก่อน'">←</button>
+                  <button type="button" class="btn-ghost sm" data-img-move="1" th:aria-label="'เลื่อนรูป ' + ${m.filename} + ' ไปหลัง'">→</button>
+                  <button type="button" class="btn-ghost sm" data-img-remove th:aria-label="'เอารูป ' + ${m.filename} + ' ออก'">ลบ</button>
+                </div>
+              </div>
+            </div>
+            <p class="caption" data-img-empty th:hidden="${!images.isEmpty()}">ยังไม่มีรูป</p>
+            <span th:replace="~{fragments/admin :: fieldError('images')}"></span>
+
+            <details>
+              <summary class="btn-ghost">+ เลือกรูปจากคลังรูป</summary>
+              <div class="picker" data-picker>
+                <label th:each="m : ${library}">
+                  <input type="checkbox" class="visually-hidden" th:value="${m.id}" th:attr="data-src=${m.url},data-name=${m.filename}">
+                  <img th:src="${m.url}" alt="" loading="lazy">
+                  <span th:text="${m.filename}">file</span>
+                </label>
+              </div>
+              <button type="button" class="btn-ghost" data-picker-add>เพิ่มรูปที่เลือก</button>
+            </details>
+            <div class="field">
+              <label for="pe-upload">หรืออัปโหลดรูปใหม่ (PNG, JPG, WEBP, SVG ไม่เกิน 5 MB ต่อไฟล์)</label>
+              <input id="pe-upload" type="file" name="newImages" multiple accept="image/png,image/jpeg,image/webp,image/svg+xml">
+              <p class="caption">รูปที่อัปโหลดจะต่อท้ายรายการเมื่อกดบันทึก</p>
+            </div>
+          </section>
+
+          <section class="panel" aria-labelledby="info-h">
+            <h2 id="info-h" class="sub">ข้อมูลสินค้า</h2>
+            <div class="form-grid">
+              <div class="field full">
+                <label for="pe-name">ชื่อสินค้า</label>
+                <input class="inp" id="pe-name" th:field="*{name}" required maxlength="200" data-preview-name>
+                <span th:replace="~{fragments/admin :: fieldError('name')}"></span>
+              </div>
+              <div class="field">
+                <label for="pe-brand">แบรนด์</label>
+                <input class="inp" id="pe-brand" th:field="*{brand}" maxlength="120" data-preview-brand>
+                <span th:replace="~{fragments/admin :: fieldError('brand')}"></span>
+              </div>
+              <div class="field">
+                <label for="pe-price">ราคา (บาท)</label>
+                <input class="inp" id="pe-price" th:field="*{price}" inputmode="numeric" placeholder="เช่น 1290 (เว้นว่าง = สอบถามราคา)" data-preview-price
+                       th:attr="aria-invalid=${errors != null and errors.containsKey('price')} ? 'true' : null">
+                <span th:replace="~{fragments/admin :: fieldError('price')}"></span>
+              </div>
+              <div class="field">
+                <label for="pe-cond">สภาพ</label>
+                <input class="inp" id="pe-cond" th:field="*{condition}" placeholder="เช่น 95%" maxlength="120">
+              </div>
+              <div class="field">
+                <label for="pe-size">ขนาด (กว้าง × สูง × ลึก ซม.)</label>
+                <input class="inp" id="pe-size" th:field="*{size}" maxlength="120">
+              </div>
+              <div class="field full">
+                <label for="pe-acc">อุปกรณ์ที่ให้มา</label>
+                <input class="inp" id="pe-acc" th:field="*{accessories}" placeholder="เช่น ถุงผ้า กล่อง การ์ด" maxlength="255">
+              </div>
+              <div class="field full">
+                <label for="pe-desc">รายละเอียดและตำหนิ</label>
+                <textarea class="inp" id="pe-desc" rows="4" th:field="*{description}" placeholder="บอกจุดเด่นและสภาพตามจริง" maxlength="5000"></textarea>
+              </div>
+              <div class="field">
+                <label for="pe-order">ลำดับการแสดง (น้อยขึ้นก่อน)</label>
+                <input class="inp" id="pe-order" type="number" min="0" max="100000" th:field="*{sortOrder}">
+              </div>
+            </div>
+            <label class="check">
+              <input type="checkbox" name="visible" value="true" th:checked="*{visible}" data-preview-visible>
+              <input type="hidden" name="_visible" value="on">
+              <span>แสดงสินค้านี้บนหน้าเว็บ</span>
+            </label>
+          </section>
+        </div>
+
+        <aside class="grow-2 stack-1 sticky" aria-label="ตัวอย่างการ์ดบนหน้าเว็บ">
+          <p class="caption">ตัวอย่างการ์ดบนหน้าเว็บ</p>
+          <article class="card-preview">
+            <div class="media"><img data-preview-img th:src="${images.isEmpty() ? 'data:,' : images[0].url}" alt=""></div>
+            <p class="eyebrow" data-preview-brand-out th:text="${#strings.isEmpty(form.brand) ? '[แบรนด์]' : form.brand}">brand</p>
+            <h3 data-preview-name-out th:text="${#strings.isEmpty(form.name) ? '[ชื่อสินค้า]' : form.name}">name</h3>
+            <div class="row">
+              <p class="h3 small" data-preview-price-out>สอบถามราคา</p>
+              <span class="btn-ghost sm" aria-hidden="true">Preview</span>
+            </div>
+          </article>
+          <p class="caption" data-preview-visible-out th:text="${form.visible} ? 'สินค้านี้จะแสดงในส่วน สินค้าแนะนำ' : 'สินค้านี้ถูกซ่อน จะไม่แสดงบนหน้าเว็บ'">note</p>
+        </aside>
+      </div>
+    </form>
+  </main>
+</div>
+</body>
+</html>

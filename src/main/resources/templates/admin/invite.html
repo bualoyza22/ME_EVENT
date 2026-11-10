@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="th" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/admin :: head('รับคำเชิญ')}"></head>
+<body>
+<main class="login-wrap">
+  <div class="login-card">
+    <div class="logo" th:if="${site.logo != null}"><img th:src="${site.logo.url}" th:alt="'โลโก้ ' + ${site.siteName}"></div>
+    <th:block th:if="${invite == null}">
+      <h1 class="sub">ลิงก์คำเชิญใช้ไม่ได้</h1>
+      <p class="muted">ลิงก์อาจหมดอายุหรือถูกใช้ไปแล้ว ขอให้เจ้าของร้านส่งคำเชิญใหม่</p>
+    </th:block>
+    <th:block th:if="${invite != null}">
+      <h1 class="sub">ตั้งรหัสผ่านผู้ดูแล</h1>
+      <p class="caption" th:text="'บัญชี: ' + ${invite.email}">email</p>
+      <form method="post" th:action="@{/admin/invite/{t}(t=${token})}" class="stack-2">
+        <div class="field"><label for="iv-name">ชื่อ</label><input id="iv-name" class="inp" name="name" required maxlength="120"></div>
+        <div class="field"><label for="iv-pw">รหัสผ่าน (อย่างน้อย 8 ตัว)</label><input id="iv-pw" class="inp" type="password" name="password" minlength="8" autocomplete="new-password" required></div>
+        <div class="field"><label for="iv-pw2">ยืนยันรหัสผ่าน</label><input id="iv-pw2" class="inp" type="password" name="confirm" minlength="8" autocomplete="new-password" required></div>
+        <p role="status" class="status" th:classappend="${inviteError != null} ? 'error'" th:text="${inviteError}"></p>
+        <button class="btn" type="submit">สร้างบัญชี</button>
+      </form>
+    </th:block>
+  </div>
+</main>
+</body>
+</html>

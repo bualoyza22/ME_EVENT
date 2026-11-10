@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="th" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/admin :: head('ข้อความ')}"></head>
+<body>
+<div class="admin-layout">
+  <nav th:replace="~{fragments/admin :: nav}"></nav>
+  <main class="admin-main">
+    <div class="titles"><p class="eyebrow">ข้อความ</p><h1 class="title">ข้อความจากหน้าติดต่อเรา</h1></div>
+    <p th:replace="~{fragments/admin :: status}"></p>
+    <p class="caption" th:unless="${mailConfigured}">ยังไม่ได้ตั้งค่า SMTP: คำตอบจะถูกบันทึกในระบบและเขียนลง log แต่ยังไม่ส่งอีเมลจริง</p>
+
+    <nav class="tabs" aria-label="กรองข้อความ">
+      <a th:href="@{/admin/messages(filter='all')}" th:attr="aria-current=${filter == 'all'} ? 'page' : null">ทั้งหมด</a>
+      <a th:href="@{/admin/messages(filter='open')}" th:attr="aria-current=${filter == 'open'} ? 'page' : null">ยังไม่ตอบ</a>
+      <a th:href="@{/admin/messages(filter='replied')}" th:attr="aria-current=${filter == 'replied'} ? 'page' : null">ตอบแล้ว</a>
+    </nav>
+
+    <div class="row-wrap">
+      <section class="panel grow-1" aria-label="รายการข้อความ">
+        <div class="msg-list">
+          <a th:each="m : ${items}" class="msg-item" th:href="@{/admin/messages(filter=${filter},id=${m.id})}"
+             th:attr="aria-current=${sel != null and sel.id == m.id} ? 'true' : null">
+            <span class="top"><span th:text="${m.name}">name</span>
+              <span class="badge" th:classappend="${m.replied} ? '' : 'solid'" th:text="${m.replied} ? 'ตอบแล้ว' : 'ยังไม่ตอบ'"></span></span>
+            <span th:text="${#strings.isEmpty(m.subject) ? '(ไม่มีหัวข้อ)' : m.subject}">subject</span>
+            <span class="caption" th:text="${#temporals.format(m.createdAt.atZone(T(com.bakban9.service.MemberService).BANGKOK), 'd MMM yyyy HH:mm')}">date</span>
+          </a>
+        </div>
+        <p class="muted" th:if="${items.isEmpty()}">ไม่มีข้อความในหมวดนี้</p>
+      </section>
+
+      <section class="panel grow-3" aria-label="รายละเอียดข้อความ" th:if="${sel != null}">
+        <div class="list-row">
+          <div class="stack-1">
+            <h2 class="sub" th:text="${#strings.isEmpty(sel.subject) ? '(ไม่มีหัวข้อ)' : sel.subject}">subject</h2>
+            <p class="caption" th:text="'จาก ' + ${sel.name} + ' · ' + ${sel.email} + ' · ' + ${#temporals.format(sel.createdAt.atZone(T(com.bakban9.service.MemberService).BANGKOK), 'd MMM yyyy HH:mm')}">from</p>
+          </div>
+          <span class="badge" th:classappend="${sel.replied} ? '' : 'solid'" th:text="${sel.replied} ? 'ตอบแล้ว' : 'ยังไม่ตอบ'"></span>
+        </div>
+        <p class="msg-body" th:text="${sel.body}">body</p>
+
+        <div th:if="${sel.replyBody != null}" class="panel tight">
+          <h3 class="small" th:text="'คำตอบที่ส่งไป · ' + ${#temporals.format(sel.repliedAt.atZone(T(com.bakban9.service.MemberService).BANGKOK), 'd MMM yyyy HH:mm')}">reply</h3>
+          <p class="msg-body" th:text="${sel.replyBody}">reply</p>
+        </div>
+
+        <form method="post" th:action="@{/admin/messages/{id}/reply(id=${sel.id})}" class="stack-2">
+          <input type="hidden" name="filter" th:value="${filter}">
+          <div class="field">
+            <label for="msg-reply">ตอบกลับทางอีเมล</label>
+            <textarea class="inp" id="msg-reply" name="body" rows="5" maxlength="10000" th:text="${replyDraft}"></textarea>
+          </div>
+          <div class="actions">
+            <button class="btn" type="submit">ส่งคำตอบทางอีเมล</button>
+          </div>
+        </form>
+        <form method="post" th:action="@{/admin/messages/{id}/status(id=${sel.id})}" class="actions">
+          <input type="hidden" name="filter" th:value="${filter}">
+          <input type="hidden" name="replied" th:value="${!sel.replied}">
+          <button class="btn-ghost" type="submit" th:text="${sel.replied} ? 'เปลี่ยนเป็นยังไม่ตอบ' : 'ทำเครื่องหมายว่าตอบแล้ว'">ทำเครื่องหมายว่าตอบแล้ว</button>
+        </form>
+      </section>
+    </div>
+  </main>
+</div>
+</body>
+</html>

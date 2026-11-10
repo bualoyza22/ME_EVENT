@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="th" xmlns:th="http://www.thymeleaf.org">
+<head th:fragment="head(title, description)">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title th:text="${title}">BAKBAN</title>
+  <meta name="description" th:if="${description != null and !#strings.isEmpty(description)}" th:content="${description}">
+  <meta property="og:title" th:content="${title}">
+  <meta property="og:description" th:if="${description != null}" th:content="${description}">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="th_TH">
+  <meta property="og:image" th:if="${site.logo != null}" th:content="${site.logo.url}">
+  <link rel="icon" th:if="${site.logo != null}" th:href="${site.logo.url}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Mitr:wght@500&amp;family=Prompt:wght@400;500&amp;display=swap">
+  <link rel="stylesheet" th:href="@{/css/tokens.css}">
+  <link rel="stylesheet" th:href="@{/css/public.css}">
+  <script th:src="@{/js/public.js}" defer></script>
+</head>
+<body>
+
+<header th:fragment="header" class="container site-header">
+  <a th:href="@{/}" class="brand-logo" th:aria-label="'กลับหน้าแรก ' + ${site.siteName}">
+    <img th:if="${site.logo != null}" th:src="${site.logo.url}"
+         th:alt="${#strings.isEmpty(site.logo.altText) ? 'โลโก้ ' + site.siteName : site.logo.altText}"
+         width="181" height="84">
+    <span th:if="${site.logo == null}" class="logo-text" th:text="${site.siteName}">BAKBAN</span>
+  </a>
+  <nav aria-label="เมนูหลัก" class="main-nav">
+    <a th:href="@{/} + '#products'"th:attr="aria-current=${activeNav == 'products'} ? 'page' : null"
+       th:text="${menu['products']}">สินค้า</a>
+    <a th:href="@{/signup}" th:attr="aria-current=${activeNav == 'signup'} ? 'page' : null" th:text="${menu['signup']}">สมัครสมาชิก</a>
+    <a th:href="@{/contact}" th:attr="aria-current=${activeNav == 'contact'} ? 'page' : null" th:text="${menu['contact']}">ติดต่อเรา</a>
+  </nav>
+</header>
+
+<footer th:fragment="footer" class="site-footer" id="footer">
+  <div class="container footer-row">
+    <div>
+      <a th:href="@{/}" class="footer-logo" th:if="${site.logo != null}" th:aria-label="'หน้าแรก ' + ${site.siteName}">
+        <img th:src="${site.logo.url}" alt="" width="109" height="51" loading="lazy">
+      </a>
+      <p th:if="${!#strings.isEmpty(site.tagline)}" th:text="${site.tagline}">tagline</p>
+      <a th:if="${!#strings.isEmpty(site.website)}" th:href="${site.websiteHref}" th:text="${site.website}">www</a>
+      <a th:href="@{/admin}" class="admin-link" rel="nofollow">สำหรับผู้ดูแล</a>
+    </div>
+    <div>
+      <th:block th:if="${!#strings.isEmpty(site.address)}">
+        <h2>Location</h2>
+        <p class="pre-line" th:text="${site.address}">address</p>
+      </th:block>
+    </div>
+    <div>
+      <th:block th:if="${site.hasContact()}">
+        <h2>Contact</h2>
+        <p class="pre-line" th:if="${!#strings.isEmpty(site.hours)}" th:text="${site.hours}">hours</p>
+        <p th:if="${!#strings.isEmpty(site.tel)}">Tel: <a th:href="${site.telHref}" th:text="${site.tel}">tel</a></p>
+        <p th:if="${!#strings.isEmpty(site.email)}">Email: <a th:href="'mailto:' + ${site.email}" th:text="${site.email}">email</a></p>
+      </th:block>
+    </div>
+    <div>
+      <th:block th:if="${!site.socials.isEmpty()}">
+        <h2>Follow us</h2>
+        <div class="chips">
+          <a th:each="s : ${site.socials}" class="chip" th:href="${s.url}" th:text="${s.label}"
+             target="_blank" rel="noopener noreferrer">IG</a>
+        </div>
+      </th:block>
+    </div>
+  </div>
+</footer>
+
+<!-- image with optional srcset; caller passes media, sizes and loading -->
+<th:block th:fragment="responsiveImg(media, alt, sizes, eager)">
+  <img th:if="${media != null}" th:src="${media.url}" th:attr="srcset=${media.srcset},sizes=${media.srcset != null ? sizes : null},width=${media.width},height=${media.height}"
+       th:alt="${#strings.isEmpty(alt) ? media.altText : alt}"
+       th:loading="${eager ? 'eager' : 'lazy'}" decoding="async">
+</th:block>
+
+</body>
+</html>

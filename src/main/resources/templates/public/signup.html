@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="th" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/public :: head(${view.get('intro').text('title')} + ' · ' + ${site.siteName}, ${view.get('intro').text('body')})}"></head>
+<body>
+<a class="skip-link" href="#main">ข้ามไปเนื้อหา</a>
+<div class="page">
+  <header th:replace="~{fragments/public :: header}"></header>
+
+  <main id="main" class="container page-main" th:with="intro=${view.get('intro')}, image=${view.get('image')}, f=${view.get('form')}">
+    <div class="split">
+      <div class="col">
+        <div class="stack-1">
+          <p class="eyebrow" th:if="${!#strings.isEmpty(intro.text('eyebrow'))}" th:text="${intro.text('eyebrow')}">BAKBAN Member</p>
+          <h1 class="page-title" th:text="${intro.text('title')}">สมัครสมาชิก</h1>
+          <p class="lead" th:text="${intro.text('body')}">body</p>
+        </div>
+        <div class="figure-box" th:if="${image.visible and image.image(0) != null}">
+          <th:block th:replace="~{fragments/public :: responsiveImg(${image.image(0)}, null, '(max-width: 720px) 90vw, 560px', ${true})}"></th:block>
+        </div>
+      </div>
+
+      <div class="form-panel" th:if="${f.visible}">
+        <div th:if="${signupResult != null}" role="status" class="thanks" tabindex="-1" data-autofocus>
+          <th:block th:if="${signupResult == 'created'}">
+            <p class="subheading" th:text="${f.text('thanksTitle')}">ขอบคุณที่สมัครนะ!</p>
+            <p class="lead" th:text="${f.text('thanksBody')}">body</p>
+          </th:block>
+          <th:block th:if="${signupResult == 'duplicate'}">
+            <p class="subheading">อีเมลนี้สมัครสมาชิกไว้แล้ว</p>
+            <p class="lead">ขอบคุณที่อยู่กับเรานะ ไม่ต้องสมัครซ้ำ</p>
+          </th:block>
+          <a class="btn" th:href="@{/} + '#products'" th:text="${f.text('shopCta')}">ไปช้อปเลย</a>
+        </div>
+
+        <form th:if="${signupResult == null}" class="stack-2" method="post" th:action="@{/signup}" novalidate
+              data-validate data-error="ขอชื่อกับอีเมลที่ถูกต้องก่อนน้า">
+          <h2 class="subheading" th:text="${f.text('title')}">ข้อมูลสมาชิก</h2>
+          <input type="hidden" name="source" value="signup">
+          <div class="hp" aria-hidden="true">
+            <label for="su-company">ไม่ต้องกรอกช่องนี้</label>
+            <input id="su-company" type="text" name="company" tabindex="-1" autocomplete="off">
+          </div>
+          <div class="field">
+            <label for="su-name">ชื่อ</label>
+            <input id="su-name" class="input" type="text" name="name" autocomplete="name" required maxlength="120"
+                   th:value="${signupForm.name}" th:attr="aria-invalid=${signupErrors != null and signupErrors.containsKey('name')} ? 'true' : null">
+          </div>
+          <div class="field">
+            <label for="su-email">อีเมล</label>
+            <input id="su-email" class="input" type="email" name="email" autocomplete="email" required maxlength="254"
+                   th:value="${signupForm.email}" th:attr="aria-invalid=${signupErrors != null and signupErrors.containsKey('email')} ? 'true' : null">
+          </div>
+          <div class="field" th:if="${f.flag('showPhone')}">
+            <label for="su-phone">เบอร์โทร (ไม่บังคับ)</label>
+            <input id="su-phone" class="input" type="tel" name="phone" autocomplete="tel" maxlength="30" data-phone
+                   th:value="${signupForm.phone}" th:attr="aria-invalid=${signupErrors != null and signupErrors.containsKey('phone')} ? 'true' : null">
+          </div>
+          <label class="check">
+            <input type="checkbox" name="consent" value="true" th:checked="${signupForm.consent}">
+            <span th:text="${f.text('consent')}">ยินยอมรับข่าวสาร</span>
+          </label>
+          <p class="caption" th:if="${!#strings.isEmpty(f.text('purpose'))}" th:text="${f.text('purpose')}">purpose</p>
+          <p class="form-error" role="alert" data-form-error th:text="${signupError}" th:hidden="${signupError == null}"></p>
+          <button class="btn" type="submit" th:text="${f.text('cta')}">รับโค้ดส่วนลด</button>
+        </form>
+      </div>
+    </div>
+  </main>
+
+  <footer th:replace="~{fragments/public :: footer}"></footer>
+</div>
+</body>
+</html>

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="th" xmlns:th="http://www.thymeleaf.org">
+<head th:fragment="head(title)">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title th:text="'Admin · ' + ${title}">Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Mitr:wght@500&amp;family=Prompt:wght@400;500&amp;display=swap">
+  <link rel="stylesheet" th:href="@{/css/tokens.css}">
+  <link rel="stylesheet" th:href="@{/css/admin.css}">
+  <script th:src="@{/js/admin.js}" defer></script>
+</head>
+<body>
+
+<nav th:fragment="nav" class="admin-nav" aria-label="เมนูผู้ดูแล">
+  <a th:href="@{/admin}" class="logo" aria-label="ภาพรวมแอดมิน">
+    <img th:if="${site.logo != null}" th:src="${site.logo.url}" th:alt="'โลโก้ ' + ${site.siteName}">
+    <span th:if="${site.logo == null}" th:text="${site.siteName}">BAKBAN</span>
+  </a>
+  <div class="group">
+    <p class="group-label">จัดการเว็บไซต์</p>
+    <a class="navi" th:href="@{/admin}" th:attr="aria-current=${nav == 'dashboard'} ? 'page' : null">ภาพรวม</a>
+    <a class="navi" th:href="@{/admin/pages}" th:attr="aria-current=${nav == 'pages'} ? 'page' : null">หน้าเว็บ</a>
+    <a class="navi" th:href="@{/admin/products}" th:attr="aria-current=${nav == 'products'} ? 'page' : null">สินค้า</a>
+    <a class="navi" th:href="@{/admin/members}" th:attr="aria-current=${nav == 'members'} ? 'page' : null">สมาชิก</a>
+    <a class="navi" th:href="@{/admin/messages}" th:attr="aria-current=${nav == 'messages'} ? 'page' : null">ข้อความ</a>
+    <a class="navi" th:href="@{/admin/media}" th:attr="aria-current=${nav == 'media'} ? 'page' : null">คลังรูป</a>
+    <a class="navi" th:href="@{/admin/footer}" th:attr="aria-current=${nav == 'footer'} ? 'page' : null">Footer</a>
+    <a class="navi" th:href="@{/admin/settings}" th:attr="aria-current=${nav == 'settings'} ? 'page' : null">ตั้งค่า</a>
+  </div>
+  <div class="bottom">
+    <p class="who" th:if="${me != null}" th:text="${me.name} + ' · ' + ${me.roleLabel}">ผู้ดูแล</p>
+    <a class="navi" th:href="@{/}" target="_blank" rel="noopener">ดูหน้าเว็บ</a>
+    <form th:action="@{/admin/logout}" method="post">
+      <button class="navi muted" type="submit">ออกจากระบบ</button>
+    </form>
+  </div>
+</nav>
+
+<p th:fragment="status" role="status" aria-live="polite" class="status" th:classappend="${statusKind}" th:text="${status}"></p>
+
+<span th:fragment="fieldError(name)" th:if="${errors != null and errors.containsKey(name)}" class="field-error"
+      th:id="'err-' + ${name}" th:text="${errors.get(name)}"></span>
+
+</body>
+</html>

@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="th" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/admin :: head('ตั้งค่า')}"></head>
+<body>
+<div class="admin-layout">
+  <nav th:replace="~{fragments/admin :: nav}"></nav>
+  <main class="admin-main">
+    <div class="titles"><p class="eyebrow">ตั้งค่า</p><h1 class="title">ตั้งค่าเว็บไซต์</h1></div>
+    <p th:replace="~{fragments/admin :: status}"></p>
+
+    <div class="row-wrap">
+      <section class="panel grow-1" aria-labelledby="st-logo-h">
+        <h2 id="st-logo-h" class="sub">โลโก้และชื่อเว็บ</h2>
+        <form method="post" th:action="@{/admin/settings}" class="stack-2">
+          <div class="logo-current" th:if="${settings.logo != null}"><img th:src="${settings.logo.url}" alt="โลโก้ที่ใช้อยู่"></div>
+          <fieldset class="stack-1" th:if="${!logos.isEmpty()}">
+            <legend class="caption">เลือกโลโก้ (รูปประเภทโลโก้ในคลังรูป)</legend>
+            <div class="logo-options">
+              <label th:each="l : ${logos}">
+                <input type="radio" name="logoId" class="visually-hidden" th:value="${l.id}" th:checked="${settings.logo != null and settings.logo.id == l.id}">
+                <img th:src="${l.url}" alt="">
+                <span th:text="${l.filename}">file</span>
+              </label>
+            </div>
+          </fieldset>
+          <a class="btn-ghost sm" th:href="@{/admin/media(filter='logo')}">อัปโหลดโลโก้ใหม่</a>
+          <div class="field">
+            <label for="st-name">ชื่อเว็บไซต์ (แสดงบนแท็บเบราว์เซอร์)</label>
+            <input class="inp" id="st-name" name="siteName" maxlength="200" required th:value="${settings.siteName}">
+          </div>
+          <div class="actions"><button class="btn" type="submit">บันทึกการตั้งค่า</button></div>
+        </form>
+      </section>
+
+      <section class="panel grow-1" aria-labelledby="st-color-h">
+        <div class="stack-1">
+          <h2 id="st-color-h" class="sub">สีของเว็บ</h2>
+          <p class="caption">อ่านอย่างเดียว มาจาก Design System BAKBAN แก้ที่ไฟล์ tokens.css เพื่อให้ทุกหน้าเปลี่ยนตาม</p>
+        </div>
+        <div class="swatches">
+          <div th:each="c : ${swatches}" class="swatch">
+            <span class="chip" th:classappend="${c.token}" aria-hidden="true"></span>
+            <span class="t"><span th:text="${c.token}">token</span><span class="muted" th:text="${c.hex}">hex</span></span>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <div class="row-wrap">
+      <section class="panel grow-1" aria-labelledby="st-admin-h">
+        <h2 id="st-admin-h" class="sub">ผู้ดูแลระบบ</h2>
+        <th:block th:if="${me.owner}">
+          <div th:each="a : ${admins}" class="list-row">
+            <div class="stack-1">
+              <span th:text="${a.name}">name</span>
+              <span class="caption" th:text="${a.email} + ' · ' + (${a.owner} ? 'เจ้าของร้าน' : 'ผู้แก้ไข') + (${a.active} ? '' : ' · ปิดอยู่')">email</span>
+            </div>
+            <div class="actions">
+              <span class="badge" th:if="${a.owner}">ทุกสิทธิ์</span>
+              <form th:if="${a.lockedUntil != null and a.lockedUntil.isAfter(T(java.time.Instant).now())}" class="inline" method="post"
+                    th:action="@{/admin/settings/admins/{id}/unlock(id=${a.id})}">
+                <button class="btn-ghost sm" type="submit">ปลดล็อก</button>
+              </form>
+              <form th:unless="${a.owner or a.id == me.id}" class="inline" method="post"
+                    th:action="@{/admin/settings/admins/{id}/active(id=${a.id})}"
+                    th:attr="data-confirm=${a.active} ? 'ปิดบัญชีของ ' + ${a.name} + ' ?' : null">
+                <input type="hidden" name="active" th:value="${!a.active}">
+                <button class="btn-ghost sm" type="submit" th:text="${a.active} ? 'ปิดบัญชี' : 'เปิดบัญชี'">ปิดบัญชี</button>
+              </form>
+            </div>
+          </div>
+          <div th:each="i : ${invites}" class="list-row">
+            <span class="caption" th:text="'รอตอบรับ: ' + ${i.email}">invite</span>
+          </div>
+          <form method="post" th:action="@{/admin/settings/admins/invite}" class="filters">
+            <div class="field">
+              <label for="st-invite">เชิญผู้ดูแลเพิ่มด้วยอีเมล (สิทธิ์ผู้แก้ไข)</label>
+              <input class="inp" id="st-invite" name="email" type="email" required maxlength="254">
+            </div>
+            <button class="btn-ghost" type="submit">ส่งคำเชิญ</button>
+          </form>
+          <p class="caption">ผู้แก้ไขแก้เนื้อหาและสินค้าได้ แต่จัดการผู้ดูแลและดาวน์โหลดรายชื่อสมาชิกไม่ได้</p>
+        </th:block>
+        <p th:unless="${me.owner}" class="muted">เฉพาะเจ้าของร้านเท่านั้นที่จัดการผู้ดูแลได้</p>
+      </section>
+
+      <section class="panel grow-1" aria-labelledby="st-pw-h">
+        <h2 id="st-pw-h" class="sub">เปลี่ยนรหัสผ่าน</h2>
+        <form method="post" th:action="@{/admin/settings/password}" class="stack-2">
+          <div class="field"><label for="st-pw-old">รหัสผ่านปัจจุบัน</label>
+            <input class="inp" id="st-pw-old" name="current" type="password" autocomplete="current-password" required></div>
+          <div class="field"><label for="st-pw-new">รหัสผ่านใหม่ (อย่างน้อย 8 ตัว)</label>
+            <input class="inp" id="st-pw-new" name="next" type="password" autocomplete="new-password" minlength="8" required></div>
+          <div class="field"><label for="st-pw-confirm">ยืนยันรหัสผ่านใหม่</label>
+            <input class="inp" id="st-pw-confirm" name="confirm" type="password" autocomplete="new-password" minlength="8" required></div>
+          <div class="actions"><button class="btn-ghost" type="submit">เปลี่ยนรหัสผ่าน</button></div>
+        </form>
+      </section>
+    </div>
+
+    <section class="panel" th:if="${me.owner}" aria-labelledby="st-audit-h">
+      <h2 id="st-audit-h" class="sub">บันทึกการแก้ไขล่าสุด</h2>
+      <div class="table-wrap">
+        <table class="tbl audit">
+          <thead><tr><th scope="col">เวลา</th><th scope="col">ผู้แก้ไข</th><th scope="col">รายการ</th><th scope="col">รายละเอียด</th></tr></thead>
+          <tbody>
+          <tr th:each="l : ${auditLog}">
+            <td th:text="${#temporals.format(l.createdAt.atZone(T(com.bakban9.service.MemberService).BANGKOK), 'd MMM yyyy HH:mm')}">time</td>
+            <td th:text="${l.adminEmail}">who</td>
+            <td th:text="${l.action}">action</td>
+            <td th:text="${l.summary}">summary</td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+</div>
+</body>
+</html>

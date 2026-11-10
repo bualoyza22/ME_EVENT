@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="th" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/public :: head(${view.get('intro').text('title')} + ' · ' + ${site.siteName}, ${view.get('intro').text('body')})}"></head>
+<body>
+<a class="skip-link" href="#main">ข้ามไปเนื้อหา</a>
+<div class="page">
+  <header th:replace="~{fragments/public :: header}"></header>
+
+  <main id="main" class="container page-main stack-3" th:with="intro=${view.get('intro')}, f=${view.get('form')}">
+    <div class="stack-1">
+      <p class="eyebrow" th:if="${!#strings.isEmpty(intro.text('eyebrow'))}" th:text="${intro.text('eyebrow')}">Contact BAKBAN</p>
+      <h1 class="page-title" th:text="${intro.text('title')}">ติดต่อเรา</h1>
+      <p class="lead" th:text="${intro.text('body')}">body</p>
+    </div>
+
+    <p class="form-error" role="status" th:if="${contactError != null and !f.visible}" th:text="${contactError}"></p>
+
+    <div class="split">
+      <div class="col">
+        <th:block th:each="s : ${view.visible()}">
+          <th:block th:switch="${s.key}">
+            <th:block th:case="'info'">
+              <div class="panel info-grid" th:if="${!#strings.isEmpty(site.address) or site.hasContact()}">
+                <div th:if="${!#strings.isEmpty(site.address)}">
+                  <h2>Location</h2>
+                  <p class="pre-line" th:text="${site.address}">address</p>
+                </div>
+                <div th:if="${!#strings.isEmpty(site.hours)}">
+                  <h2>เวลาเปิด</h2>
+                  <p class="pre-line" th:text="${site.hours}">hours</p>
+                </div>
+                <div th:if="${!#strings.isEmpty(site.tel)}">
+                  <h2>Tel</h2>
+                  <a th:href="${site.telHref}" th:text="${site.tel}">tel</a>
+                </div>
+                <div th:if="${!#strings.isEmpty(site.email)}">
+                  <h2>Email</h2>
+                  <a th:href="'mailto:' + ${site.email}" th:text="${site.email}">email</a>
+                </div>
+              </div>
+              <div class="panel stack-1" th:if="${!site.socials.isEmpty()}">
+                <h2>Follow us</h2>
+                <div class="chips">
+                  <a th:each="so : ${site.socials}" class="chip" th:href="${so.url}" th:text="${so.label}"
+                     target="_blank" rel="noopener noreferrer">IG</a>
+                </div>
+              </div>
+            </th:block>
+            <th:block th:case="'map'">
+              <iframe th:if="${site.map.embedUrl != null}" class="map-frame" th:src="${site.map.embedUrl}"
+                      th:title="'แผนที่ร้าน ' + ${site.siteName}" loading="lazy" referrerpolicy="no-referrer-when-downgrade"
+                      allowfullscreen></iframe>
+              <a th:if="${site.map.linkUrl != null}" class="btn-ghost" th:href="${site.map.linkUrl}"
+                 target="_blank" rel="noopener noreferrer">เปิดแผนที่ใน Google Maps</a>
+            </th:block>
+          </th:block>
+        </th:block>
+      </div>
+
+      <div class="form-panel top" th:if="${f.visible}">
+        <div th:if="${contactSent != null}" role="status" class="thanks" tabindex="-1" data-autofocus>
+          <p class="subheading" th:text="${f.text('thanksTitle')}">ได้รับข้อความแล้ว</p>
+          <p class="lead" th:text="${f.text('thanksBody')}">body</p>
+        </div>
+        <form th:if="${contactSent == null}" class="stack-2" method="post" th:action="@{/contact}" novalidate
+              data-validate data-error="กรอกชื่อ อีเมล และข้อความให้ครบก่อนน้า">
+          <h2 class="subheading" th:text="${f.text('title')}">ส่งข้อความถึงเรา</h2>
+          <div class="hp" aria-hidden="true">
+            <label for="ct-company">ไม่ต้องกรอกช่องนี้</label>
+            <input id="ct-company" type="text" name="company" tabindex="-1" autocomplete="off">
+          </div>
+          <div class="field">
+            <label for="ct-name">ชื่อ</label>
+            <input id="ct-name" class="input" type="text" name="name" autocomplete="name" required maxlength="120"
+                   th:value="${contactForm.name}" th:attr="aria-invalid=${contactErrors != null and contactErrors.containsKey('name')} ? 'true' : null">
+          </div>
+          <div class="field">
+            <label for="ct-email">อีเมล</label>
+            <input id="ct-email" class="input" type="email" name="email" autocomplete="email" required maxlength="254"
+                   th:value="${contactForm.email}" th:attr="aria-invalid=${contactErrors != null and contactErrors.containsKey('email')} ? 'true' : null">
+          </div>
+          <div class="field">
+            <label for="ct-subject">หัวข้อ</label>
+            <input id="ct-subject" class="input" type="text" name="subject" maxlength="200" th:value="${contactForm.subject}">
+          </div>
+          <div class="field">
+            <label for="ct-message">ข้อความ</label>
+            <textarea id="ct-message" class="input" name="message" rows="5" required maxlength="5000"
+                      th:text="${contactForm.message}" th:attr="aria-invalid=${contactErrors != null and contactErrors.containsKey('message')} ? 'true' : null"></textarea>
+          </div>
+          <p class="caption" th:if="${!#strings.isEmpty(f.text('purpose'))}" th:text="${f.text('purpose')}">purpose</p>
+          <p class="form-error" role="alert" data-form-error th:text="${contactError}" th:hidden="${contactError == null}"></p>
+          <button class="btn" type="submit" th:text="${f.text('cta')}">ส่งข้อความ</button>
+        </form>
+      </div>
+    </div>
+  </main>
+
+  <footer th:replace="~{fragments/public :: footer}"></footer>
+</div>
+</body>
+</html>

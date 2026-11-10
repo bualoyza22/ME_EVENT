@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="th" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/admin :: head('ไม่มีสิทธิ์')}"></head>
+<body>
+<div class="admin-layout">
+  <nav th:replace="~{fragments/admin :: nav}"></nav>
+  <main class="admin-main">
+    <div class="titles"><p class="eyebrow">403</p><h1 class="title">ไม่มีสิทธิ์ทำรายการนี้</h1></div>
+    <p class="muted">เฉพาะเจ้าของร้านเท่านั้นที่จัดการผู้ดูแลและดาวน์โหลดรายชื่อสมาชิกได้</p>
+    <div class="actions"><a class="btn-ghost" th:href="@{/admin}">กลับไปภาพรวม</a></div>
+  </main>
+</div>
+</body>
+</html>

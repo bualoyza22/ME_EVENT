@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="th" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/admin :: head('คลังรูป')}"></head>
+<body>
+<div class="admin-layout">
+  <nav th:replace="~{fragments/admin :: nav}"></nav>
+  <main class="admin-main">
+    <div class="titles"><p class="eyebrow">คลังรูป</p><h1 class="title">รูปภาพและโลโก้</h1></div>
+    <p th:replace="~{fragments/admin :: status}"></p>
+
+    <form method="post" enctype="multipart/form-data" th:action="@{/admin/media}" class="drop">
+      <label for="md-upload" class="h3 small">+ อัปโหลดรูป (เลือกได้หลายไฟล์)</label>
+      <span class="caption">PNG, JPG, WEBP หรือ SVG · ไม่เกิน 5 MB ต่อไฟล์ · รูปสินค้าแนะนำพื้นขาวหรือพื้นครีม</span>
+      <input id="md-upload" type="file" name="files" multiple accept="image/png,image/jpeg,image/webp,image/svg+xml" required>
+      <div class="actions">
+        <label for="md-kind" class="caption">ประเภท</label>
+        <select class="inp" id="md-kind" name="kind">
+          <option value="other">อัปโหลดใหม่</option>
+          <option value="product">สินค้า</option>
+          <option value="logo">โลโก้</option>
+        </select>
+        <button class="btn" type="submit">อัปโหลด</button>
+      </div>
+    </form>
+
+    <div class="page-head">
+      <nav class="tabs" aria-label="กรองรูป">
+        <a th:each="f : ${filters}" th:href="@{/admin/media(filter=${f.key})}" th:text="${f.value}"
+           th:attr="aria-current=${f.key == filter} ? 'page' : null">ทั้งหมด</a>
+      </nav>
+      <p class="caption" th:text="${items.size()} + ' รูป'">0</p>
+    </div>
+
+    <div class="media-grid">
+      <figure th:each="it : ${items}" class="media-card">
+        <div class="preview"><img th:src="${it.media.url}" th:alt="${it.media.altText}" loading="lazy"></div>
+        <figcaption>
+          <span class="name" th:text="${it.media.filename}" th:title="${it.media.filename}">file</span>
+          <span class="caption" th:text="${it.usage.isEmpty()} ? 'ยังไม่ได้ใช้' : 'ใช้อยู่: ' + ${#strings.listJoin(it.usage, ', ')}">usage</span>
+          <span class="caption" th:text="${it.media.width != null} ? ${it.media.width} + '×' + ${it.media.height} + ' px · ' + ${it.media.sizeBytes / 1024} + ' KB' : 'SVG · ' + ${it.media.sizeBytes / 1024} + ' KB'">size</span>
+        </figcaption>
+        <details>
+          <summary>คำอธิบายรูป (alt)</summary>
+          <form method="post" th:action="@{/admin/media/{id}/alt(id=${it.media.id})}" class="stack-1">
+            <input type="hidden" name="filter" th:value="${filter}">
+            <label class="visually-hidden" th:for="'alt-' + ${it.media.id}">คำอธิบายรูป</label>
+            <input class="inp" th:id="'alt-' + ${it.media.id}" name="alt" maxlength="255" th:value="${it.media.altText}">
+            <button class="btn-ghost sm" type="submit">บันทึก</button>
+          </form>
+        </details>
+        <form method="post" th:action="@{/admin/media/{id}/delete(id=${it.media.id})}" class="inline"
+              th:attr="data-confirm='ลบรูป ' + ${it.media.filename} + ' ?'">
+          <input type="hidden" name="filter" th:value="${filter}">
+          <button class="btn-ghost sm" type="submit" th:disabled="${!it.usage.isEmpty()}"
+                  th:aria-label="'ลบ ' + ${it.media.filename}" th:title="${!it.usage.isEmpty()} ? 'ลบไม่ได้ เพราะยังใช้อยู่'">ลบ</button>
+        </form>
+      </figure>
+    </div>
+    <p class="empty" th:if="${items.isEmpty()}">ยังไม่มีรูปในหมวดนี้</p>
+  </main>
+</div>
+</body>
+</html>

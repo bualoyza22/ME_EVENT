@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="th" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/admin :: head('หน้าเว็บ')}"></head>
+<body>
+<div class="admin-layout">
+  <nav th:replace="~{fragments/admin :: nav}"></nav>
+  <main class="admin-main">
+    <div class="page-head">
+      <div class="titles">
+        <p class="eyebrow">หน้าเว็บ</p>
+        <h1 class="title">จัดการหน้าเว็บ</h1>
+      </div>
+      <div class="actions">
+        <a class="btn-ghost" th:href="${pageDef.path}" target="_blank" rel="noopener">ดูหน้านี้</a>
+        <form th:if="${pageDef.slug != 'home'}" class="inline" method="post" th:action="@{/admin/pages/{s}/publish(s=${pageDef.slug})}">
+          <input type="hidden" name="published" th:value="${!view.page.published}">
+          <button class="btn-ghost" type="submit" th:text="${view.page.published} ? 'ปิดหน้านี้' : 'เผยแพร่หน้านี้'"
+                  th:attr="data-confirm=${view.page.published} ? 'ปิดหน้านี้? ผู้เข้าชมจะเปิดหน้านี้ไม่ได้' : null">ปิดหน้านี้</button>
+        </form>
+      </div>
+    </div>
+    <p th:replace="~{fragments/admin :: status}"></p>
+
+    <nav class="tabs" aria-label="เลือกหน้า">
+      <a th:each="p : ${pageDefs}" th:href="@{/admin/pages(page=${p.slug})}" th:text="${p.label}"
+         th:attr="aria-current=${p.slug == pageDef.slug} ? 'page' : null">หน้า</a>
+    </nav>
+    <p class="caption" th:unless="${view.page.published}">หน้านี้ปิดอยู่ ผู้เข้าชมจะเห็นหน้าไม่พบ</p>
+
+    <div class="row-wrap">
+      <section class="panel grow-1" aria-labelledby="sec-h">
+        <div class="stack-1">
+          <h2 id="sec-h" class="sub">ส่วนของหน้า</h2>
+          <p class="caption">เลือกส่วนเพื่อแก้ไข เปิดหรือปิดการแสดง และเลื่อนลำดับ</p>
+        </div>
+        <div th:each="s, st : ${view.sections}" class="section-row" th:attr="aria-current=${s.key == current.key} ? 'true' : null">
+          <a class="pick" th:href="@{/admin/pages(page=${pageDef.slug},section=${s.key})}"
+             th:text="${st.count} + '. ' + ${s.label} + (${s.visible} ? '' : ' (ซ่อน)')" th:aria-label="'แก้ไขส่วน ' + ${s.label}">ส่วน</a>
+          <th:block th:unless="${s.fixed}">
+            <form class="inline" method="post" th:action="@{/admin/pages/{p}/sections/{k}/move(p=${pageDef.slug},k=${s.key})}">
+              <input type="hidden" name="dir" value="up">
+              <button class="btn-ghost icon" type="submit" th:aria-label="'เลื่อน ' + ${s.label} + ' ขึ้น'">
+                <svg aria-hidden="true" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 10 5-5 5 5"/></svg>
+              </button>
+            </form>
+            <form class="inline" method="post" th:action="@{/admin/pages/{p}/sections/{k}/move(p=${pageDef.slug},k=${s.key})}">
+              <input type="hidden" name="dir" value="down">
+              <button class="btn-ghost icon" type="submit" th:aria-label="'เลื่อน ' + ${s.label} + ' ลง'">
+                <svg aria-hidden="true" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 6 5 5 5-5"/></svg>
+              </button>
+            </form>
+            <form class="inline" method="post" th:action="@{/admin/pages/{p}/sections/{k}/visibility(p=${pageDef.slug},k=${s.key})}">
+              <input type="hidden" name="visible" th:value="${!s.visible}">
+              <button class="btn-ghost sm" type="submit" th:attr="aria-pressed=${s.visible}"
+                      th:aria-label="(${s.visible} ? 'ซ่อนส่วน ' : 'แสดงส่วน ') + ${s.label}" th:text="${s.visible} ? 'แสดง' : 'ซ่อน'">แสดง</button>
+            </form>
+          </th:block>
+          <span th:if="${s.fixed}" class="caption">ตำแหน่งคงที่</span>
+        </div>
+      </section>
+
+      <section class="panel grow-3" aria-labelledby="edit-h">
+        <div class="stack-1">
+          <p class="caption" th:text="${pageDef.label} + ' › กำลังแก้ไข'">หน้า</p>
+          <h2 id="edit-h" class="sub" th:text="${def.label}">ส่วน</h2>
+          <p class="caption" th:if="${def.note != null}" th:text="${def.note}">note</p>
+        </div>
+        <form method="post" th:action="@{/admin/pages/{p}/sections/{k}(p=${pageDef.slug},k=${def.key})}" class="stack-2">
+          <div class="form-grid">
+            <div th:each="f : ${def.fields}" class="field" th:classappend="${f.type.name() == 'TEXTAREA'} ? 'full'">
+              <th:block th:switch="${f.type.name()}">
+                <label th:case="'BOOLEAN'" class="check">
+                  <input type="checkbox" th:name="'f_' + ${f.key}" value="true" th:checked="${values.get(f.key) == 'true'}">
+                  <span th:text="${f.label}">flag</span>
+                </label>
+                <th:block th:case="'TEXTAREA'">
+                  <label th:for="'pg-' + ${f.key}" th:text="${f.label}">label</label>
+                  <textarea class="inp" rows="3" th:id="'pg-' + ${f.key}" th:name="'f_' + ${f.key}" th:maxlength="${f.maxLength}"
+                            th:text="${values.get(f.key)}"></textarea>
+                </th:block>
+                <th:block th:case="'NUMBER'">
+                  <label th:for="'pg-' + ${f.key}" th:text="${f.label}">label</label>
+                  <input class="inp" type="number" min="1" max="48" th:id="'pg-' + ${f.key}" th:name="'f_' + ${f.key}" th:value="${values.get(f.key)}">
+                </th:block>
+                <th:block th:case="*">
+                  <label th:for="'pg-' + ${f.key}" th:text="${f.label}">label</label>
+                  <input class="inp" type="text" th:id="'pg-' + ${f.key}" th:name="'f_' + ${f.key}" th:maxlength="${f.maxLength}" th:value="${values.get(f.key)}">
+                </th:block>
+              </th:block>
+              <span th:replace="~{fragments/admin :: fieldError(${f.key})}"></span>
+            </div>
+          </div>
+
+          <div th:if="${def.editsMapUrl}" class="field">
+            <label for="pg-map">ลิงก์ Google Maps หรือโค้ดฝังแผนที่</label>
+            <textarea id="pg-map" class="inp" rows="3" name="mapUrl" maxlength="2000"
+                      placeholder="https://www.google.com/maps/embed?pb=… หรือ <iframe src=…>" th:text="${mapUrl}"></textarea>
+            <p class="caption">ใน Google Maps กด แชร์ › ฝังแผนที่ แล้วคัดลอกโค้ดมาวาง ถ้าใช้ลิงก์สั้น (maps.app.goo.gl) หน้าเว็บจะแสดงเป็นปุ่มเปิดแผนที่แทน</p>
+            <span th:replace="~{fragments/admin :: fieldError('mapUrl')}"></span>
+          </div>
+
+          <div th:if="${def.imageSlots > 0}" class="stack-1">
+            <h3 class="small">รูปในส่วนนี้</h3>
+            <div class="slots">
+              <div th:each="mid, st : ${selectedMedia}" class="slot">
+                <div class="preview">
+                  <img th:each="m : ${library}" th:if="${m.id == mid}" th:src="${m.url}" th:alt="${m.altText}" data-slot-img>
+                </div>
+                <label class="caption" th:for="'slot-' + ${st.index}" th:text="'รูปที่ ' + ${st.count} + (${st.first} ? ' (รูปใหญ่)' : '')">รูป</label>
+                <select class="inp" th:id="'slot-' + ${st.index}" name="mediaIds" data-slot-select>
+                  <option value="">— ไม่ใส่รูป —</option>
+                  <option th:each="m : ${library}" th:value="${m.id}" th:selected="${m.id == mid}"
+                          th:attr="data-src=${m.url}" th:text="${m.filename}">file</option>
+                </select>
+              </div>
+            </div>
+            <p class="caption">อัปโหลดรูปใหม่ได้ที่ <a th:href="@{/admin/media}">คลังรูป</a></p>
+            <span th:replace="~{fragments/admin :: fieldError('images')}"></span>
+          </div>
+
+          <p th:if="${def.fields.isEmpty() and def.imageSlots == 0 and !def.editsMapUrl}" class="muted">ส่วนนี้ไม่มีข้อความให้แก้ในหน้านี้</p>
+
+          <div class="actions" th:if="${!def.fields.isEmpty() or def.imageSlots > 0 or def.editsMapUrl}">
+            <button class="btn" type="submit">บันทึกและเผยแพร่</button>
+            <a class="btn-ghost" th:href="${pageDef.path}" target="_blank" rel="noopener">ดูหน้านี้</a>
+          </div>
+        </form>
+      </section>
+    </div>
+  </main>
+</div>
+</body>
+</html>

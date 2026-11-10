@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="th" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/admin :: head('เข้าสู่ระบบ')}"></head>
+<body>
+<main class="login-wrap">
+  <div class="login-card">
+    <div class="logo" th:if="${site.logo != null}"><img th:src="${site.logo.url}" th:alt="'โลโก้ ' + ${site.siteName}"></div>
+    <h1 class="sub">เข้าสู่ระบบผู้ดูแล</h1>
+    <form method="post" th:action="@{/admin/login}" class="stack-2">
+      <div class="field">
+        <label for="ad-user">ชื่อผู้ใช้ (อีเมล)</label>
+        <input id="ad-user" class="inp" type="email" name="email" autocomplete="username" required autofocus>
+      </div>
+      <div class="field">
+        <label for="ad-pass">รหัสผ่าน</label>
+        <input id="ad-pass" class="inp" type="password" name="password" autocomplete="current-password" required>
+      </div>
+      <p role="status" aria-live="polite" class="status" th:classappend="${loginError != null} ? 'error' : (${info != null} ? 'ok' : '')"
+         th:text="${loginError != null ? loginError : info}"></p>
+      <button class="btn" type="submit">เข้าสู่ระบบ</button>
+    </form>
+    <a th:href="@{/}" class="caption">← กลับหน้าเว็บ</a>
+  </div>
+</main>
+</body>
+</html>

@@ -1,0 +1,16 @@
+spring:
+  datasource:
+    url: ${TEST_DATABASE_URL:jdbc:postgresql://localhost:5432/bakban9_test}
+    username: ${TEST_DATABASE_USER:bakban9}
+    password: ${TEST_DATABASE_PASSWORD:bakban9}
+  flyway:
+    clean-disabled: false
+  thymeleaf:
+    cache: false
+bakban:
+  seed:
+    enabled: true
+  storage:
+    local-dir: ./target/test-uploads
+  rate-limit:
+    form-max: 3

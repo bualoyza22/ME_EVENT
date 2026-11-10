@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="th" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/admin :: head('Footer')}"></head>
+<body>
+<div class="admin-layout">
+  <nav th:replace="~{fragments/admin :: nav}"></nav>
+  <main class="admin-main">
+    <form method="post" th:action="@{/admin/footer}" class="stack-3" data-footer-form>
+      <div class="page-head">
+        <div class="titles">
+          <p class="eyebrow">Footer</p>
+          <h1 class="title">ข้อมูลร้านและช่องทางติดต่อ</h1>
+          <p class="caption">ใช้ทั้งใน Footer ทุกหน้าและในหน้าติดต่อเรา ช่องที่เว้นว่างจะไม่แสดงบนหน้าเว็บ</p>
+        </div>
+        <button class="btn" type="submit">บันทึก Footer</button>
+      </div>
+      <p th:replace="~{fragments/admin :: status}"></p>
+
+      <div class="row-wrap">
+        <section class="panel grow-1" aria-labelledby="g-shop">
+          <h2 id="g-shop" class="sub">ร้าน</h2>
+          <div class="field"><label for="ft-tagline">สโลแกน</label>
+            <input class="inp" id="ft-tagline" name="tagline" maxlength="255" th:value="${form.tagline}" data-fp="tagline"></div>
+          <div class="field"><label for="ft-website">เว็บไซต์</label>
+            <input class="inp" id="ft-website" name="website" maxlength="255" placeholder="www.example.com" th:value="${form.website}" data-fp="website"
+                   th:attr="aria-invalid=${errors != null and errors.containsKey('website')} ? 'true' : null">
+            <span th:replace="~{fragments/admin :: fieldError('website')}"></span></div>
+          <div class="field"><label for="ft-address">Location</label>
+            <textarea class="inp" id="ft-address" name="address" rows="3" maxlength="500" th:text="${form.address}" data-fp="address"></textarea></div>
+        </section>
+        <section class="panel grow-1" aria-labelledby="g-contact">
+          <h2 id="g-contact" class="sub">ติดต่อ</h2>
+          <div class="field"><label for="ft-hours">เวลาเปิด</label>
+            <textarea class="inp" id="ft-hours" name="hours" rows="2" maxlength="255" th:text="${form.hours}" data-fp="hours"></textarea></div>
+          <div class="field"><label for="ft-tel">Tel</label>
+            <input class="inp" id="ft-tel" name="tel" type="tel" maxlength="40" placeholder="+66 …" th:value="${form.tel}" data-fp="tel"
+                   th:attr="aria-invalid=${errors != null and errors.containsKey('tel')} ? 'true' : null">
+            <span th:replace="~{fragments/admin :: fieldError('tel')}"></span></div>
+          <div class="field"><label for="ft-email">Email</label>
+            <input class="inp" id="ft-email" name="email" type="email" maxlength="255" th:value="${form.email}" data-fp="email"
+                   th:attr="aria-invalid=${errors != null and errors.containsKey('email')} ? 'true' : null">
+            <span th:replace="~{fragments/admin :: fieldError('email')}"></span></div>
+        </section>
+        <section class="panel grow-1" aria-labelledby="g-social">
+          <h2 id="g-social" class="sub">โซเชียล</h2>
+          <div class="field"><label for="ft-ig">ลิงก์ Instagram</label>
+            <input class="inp" id="ft-ig" name="instagramUrl" type="url" maxlength="500" placeholder="https://instagram.com/…" th:value="${form.instagramUrl}" data-fs="Instagram"
+                   th:attr="aria-invalid=${errors != null and errors.containsKey('instagramUrl')} ? 'true' : null">
+            <span th:replace="~{fragments/admin :: fieldError('instagramUrl')}"></span></div>
+          <div class="field"><label for="ft-line">ลิงก์ LINE</label>
+            <input class="inp" id="ft-line" name="lineUrl" type="url" maxlength="500" placeholder="https://line.me/…" th:value="${form.lineUrl}" data-fs="LINE"
+                   th:attr="aria-invalid=${errors != null and errors.containsKey('lineUrl')} ? 'true' : null">
+            <span th:replace="~{fragments/admin :: fieldError('lineUrl')}"></span></div>
+          <div class="field"><label for="ft-fb">ลิงก์ Facebook</label>
+            <input class="inp" id="ft-fb" name="facebookUrl" type="url" maxlength="500" placeholder="https://facebook.com/…" th:value="${form.facebookUrl}" data-fs="Facebook"
+                   th:attr="aria-invalid=${errors != null and errors.containsKey('facebookUrl')} ? 'true' : null">
+            <span th:replace="~{fragments/admin :: fieldError('facebookUrl')}"></span></div>
+          <div class="field"><label for="ft-tt">ลิงก์ TikTok</label>
+            <input class="inp" id="ft-tt" name="tiktokUrl" type="url" maxlength="500" placeholder="https://tiktok.com/@…" th:value="${form.tiktokUrl}" data-fs="TikTok"
+                   th:attr="aria-invalid=${errors != null and errors.containsKey('tiktokUrl')} ? 'true' : null">
+            <span th:replace="~{fragments/admin :: fieldError('tiktokUrl')}"></span></div>
+          <p class="caption">ลิงก์ LINE ใช้กับปุ่ม "สนใจใบนี้ ทักเลย" ด้วย ถ้าเว้นว่าง ปุ่มจะพาไปหน้าติดต่อเรา</p>
+        </section>
+      </div>
+
+      <section class="stack-1" aria-labelledby="fp-h">
+        <h2 id="fp-h" class="small">ตัวอย่าง Footer (อัปเดตตามที่พิมพ์)</h2>
+        <div class="fprev">
+          <div>
+            <div class="logo"><img th:if="${site.logo != null}" th:src="${site.logo.url}" alt=""></div>
+            <p data-fp-out="tagline"></p>
+            <p data-fp-out="website"></p>
+          </div>
+          <div><p class="h">Location</p><p class="pre-line" data-fp-out="address"></p></div>
+          <div><p class="h">Contact</p><p class="pre-line" data-fp-out="hours"></p><p>Tel: <span data-fp-out="tel"></span></p><p>Email: <span data-fp-out="email"></span></p></div>
+          <div><p class="h">Follow us</p><div class="actions" data-fs-out></div><p class="caption">เส้นประ = ยังไม่มีลิงก์ (ไม่แสดงบนหน้าเว็บ)</p></div>
+        </div>
+      </section>
+    </form>
+  </main>
+</div>
+</body>
+</html>

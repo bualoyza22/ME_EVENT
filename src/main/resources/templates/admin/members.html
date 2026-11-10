@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="th" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/admin :: head('สมาชิก')}"></head>
+<body>
+<div class="admin-layout">
+  <nav th:replace="~{fragments/admin :: nav}"></nav>
+  <main class="admin-main">
+    <div class="page-head">
+      <div class="titles"><p class="eyebrow">สมาชิก</p><h1 class="title">สมาชิกที่สมัครผ่านเว็บ</h1></div>
+      <a th:if="${me.owner}" class="btn" th:href="@{/admin/members/export(q=${q},consent=${consent})}">ดาวน์โหลด CSV</a>
+    </div>
+    <p th:replace="~{fragments/admin :: status}"></p>
+    <p class="caption" th:unless="${me.owner}">ดาวน์โหลดรายชื่อและลบข้อมูลสมาชิกได้เฉพาะเจ้าของร้าน</p>
+
+    <form class="filters" method="get" th:action="@{/admin/members}">
+      <div class="field">
+        <label for="mb-search">ค้นหาชื่อ อีเมล หรือเบอร์โทร</label>
+        <input class="inp" id="mb-search" type="search" name="q" th:value="${q}">
+      </div>
+      <div class="field narrow">
+        <label for="mb-consent">การรับข่าวสาร</label>
+        <select class="inp" id="mb-consent" name="consent" data-autosubmit>
+          <option value="all" th:selected="${consent == 'all'}">ทั้งหมด</option>
+          <option value="yes" th:selected="${consent == 'yes'}">ยินยอมรับข่าวสาร</option>
+          <option value="no" th:selected="${consent == 'no'}">ไม่รับข่าวสาร</option>
+        </select>
+      </div>
+      <button class="btn-ghost" type="submit">ค้นหา</button>
+      <p class="caption" th:text="${rows.size()} + ' คน'">0</p>
+    </form>
+
+    <div class="table-wrap">
+      <table class="tbl">
+        <thead>
+        <tr><th scope="col">ชื่อ</th><th scope="col">อีเมล</th><th scope="col">เบอร์โทร</th><th scope="col">วันที่สมัคร</th><th scope="col">รับข่าวสาร</th><th scope="col">โค้ดส่วนลด</th><th scope="col" th:if="${me.owner}"><span class="visually-hidden">จัดการ</span></th></tr>
+        </thead>
+        <tbody>
+        <tr th:each="m : ${rows}">
+          <td th:text="${m.name}">name</td>
+          <td th:text="${m.email}">email</td>
+          <td th:text="${#strings.isEmpty(m.phone) ? '—' : m.phone}">phone</td>
+          <td th:text="${#temporals.format(m.createdAt.atZone(T(com.bakban9.service.MemberService).BANGKOK), 'd MMM yyyy HH:mm')}">date</td>
+          <td th:text="${m.consentMarketing} ? 'ใช่' : 'ไม่'">yes</td>
+          <td>
+            <form class="inline" method="post" th:action="@{/admin/members/{id}/code(id=${m.id})}">
+              <input type="hidden" name="sent" th:value="${m.codeSentAt == null}">
+              <button class="btn-ghost sm" type="submit" th:attr="aria-pressed=${m.codeSentAt != null}"
+                      th:aria-label="(${m.codeSentAt == null} ? 'บันทึกว่าส่งโค้ดให้ ' : 'ยกเลิกสถานะส่งโค้ดของ ') + ${m.name}"
+                      th:text="${m.codeSentAt == null} ? 'ยังไม่ส่ง' : 'ส่งแล้ว'">ยังไม่ส่ง</button>
+            </form>
+          </td>
+          <td th:if="${me.owner}">
+            <form class="inline" method="post" th:action="@{/admin/members/{id}/delete(id=${m.id})}"
+                  th:attr="data-confirm='ลบข้อมูลของ ' + ${m.name} + ' ? (ใช้เมื่อสมาชิกขอลบข้อมูลตาม PDPA)'">
+              <button class="btn-ghost sm" type="submit" th:aria-label="'ลบข้อมูล ' + ${m.name}">ลบ</button>
+            </form>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+      <p class="empty" th:if="${rows.isEmpty()}">ยังไม่มีสมาชิกที่ตรงกับการค้นหา</p>
+    </div>
+  </main>
+</div>
+</body>
+</html>

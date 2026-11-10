@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="th" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/public :: head(${site.siteName}, ${view.get('hero').text('body')})}"></head>
+<body>
+<a class="skip-link" href="#main">ข้ามไปเนื้อหา</a>
+<div class="page" id="top">
+  <header th:replace="~{fragments/public :: header}"></header>
+
+  <main id="main">
+    <th:block th:each="s : ${view.visible()}">
+      <th:block th:switch="${s.key}">
+
+        <!-- Hero -->
+        <section th:case="'hero'" class="container hero" aria-labelledby="hero-title">
+          <div class="hero-text">
+            <p class="eyebrow" th:if="${!#strings.isEmpty(s.text('eyebrow'))}" th:text="${s.text('eyebrow')}">eyebrow</p>
+            <h1 id="hero-title" class="hero-title" th:text="${s.text('headline')}">headline</h1>
+            <p class="lead" th:if="${!#strings.isEmpty(s.text('body'))}" th:text="${s.text('body')}">body</p>
+            <a class="btn" href="#products" th:if="${!#strings.isEmpty(s.text('cta'))}" th:text="${s.text('cta')}">cta</a>
+          </div>
+          <div class="hero-grid" th:if="${!s.media.isEmpty()}">
+            <div class="tile" th:each="m, st : ${s.media}">
+              <th:block th:replace="~{fragments/public :: responsiveImg(${m}, null, ${st.first ? '(max-width: 720px) 90vw, 400px' : '(max-width: 720px) 45vw, 240px'}, ${true})}"></th:block>
+            </div>
+          </div>
+        </section>
+
+        <!-- Products -->
+        <section th:case="'products'" id="products" class="container products" aria-labelledby="products-title">
+          <div class="products-head">
+            <h2 id="products-title" class="section-title" th:text="${s.text('title')}">สินค้าแนะนำ</h2>
+            <form class="brand-search" role="search" method="get" th:action="@{/} + '#products'">
+              <label for="brand-q" class="visually-hidden">ค้นหาแบรนด์</label>
+              <input id="brand-q" class="input" type="search" name="brand" th:value="${catalog.brand}"
+                     th:placeholder="${s.text('searchPlaceholder')}" autocomplete="off" maxlength="120">
+              <button class="btn" type="submit" th:text="${s.text('searchButton')}">Search Brand</button>
+            </form>
+          </div>
+
+          <div class="product-grid" th:if="${!catalog.isEmpty()}">
+            <article class="card product-card" th:each="p, st : ${catalog.items}">
+              <div class="product-media">
+                <th:block th:replace="~{fragments/public :: responsiveImg(${p.mainImage}, ${p.name}, '(max-width: 640px) 90vw, 320px', ${false})}"></th:block>
+              </div>
+              <h3 th:text="${p.name}">name</h3>
+              <div class="row">
+                <p class="price" th:text="${T(com.bakban9.util.Texts).formatPrice(p.priceThb)}">price</p>
+                <button class="btn-ghost" type="button" aria-haspopup="dialog"
+                        th:attr="data-preview=${catalog.offset + st.index}" th:aria-label="'Preview ' + ${p.name}">Preview</button>
+              </div>
+            </article>
+          </div>
+
+          <p class="empty-note" role="status" th:if="${catalog.isEmpty()}">
+            <span th:text="${s.text('emptyText')}">ไม่เจอแบรนด์นี้ ลองคำอื่นดูนะ</span>
+            <a th:if="${!#strings.isEmpty(catalog.brand)}" th:href="@{/} + '#products'">ดูสินค้าทั้งหมด</a>
+          </p>
+
+          <nav class="pagination" aria-label="เปลี่ยนหน้าสินค้า" th:if="${catalog.pageCount > 1}">
+            <a th:if="${catalog.hasPrev()}" class="icon-btn" th:href="${pager.prev}" aria-label="หน้าก่อนหน้า">
+              <svg aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3 5 8l5 5"/></svg>
+            </a>
+            <span th:unless="${catalog.hasPrev()}" class="icon-btn" aria-disabled="true">
+              <svg aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3 5 8l5 5"/></svg>
+              <span class="visually-hidden">หน้าก่อนหน้า</span>
+            </span>
+            <a th:each="l : ${pager.pages}" class="icon-btn" th:href="${l.url}" th:text="${l.num}"
+               th:aria-label="'หน้า ' + ${l.num}" th:attr="aria-current=${l.current} ? 'page' : null">1</a>
+            <a th:if="${catalog.hasNext()}" class="icon-btn" th:href="${pager.next}" aria-label="หน้าถัดไป">
+              <svg aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 3 5 5-5 5"/></svg>
+            </a>
+            <span th:unless="${catalog.hasNext()}" class="icon-btn" aria-disabled="true">
+              <svg aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 3 5 5-5 5"/></svg>
+              <span class="visually-hidden">หน้าถัดไป</span>
+            </span>
+          </nav>
+        </section>
+
+        <!-- Sign-up (short) -->
+        <section th:case="'signup'" id="signup" class="container signup-band" aria-labelledby="signup-title">
+          <div class="band">
+            <div class="stack-1">
+              <h2 id="signup-title" class="section-title" th:text="${s.text('title')}">สมัครสมาชิก</h2>
+              <p class="lead" th:text="${s.text('body')}">body</p>
+            </div>
+            <div>
+              <div th:if="${signupResult != null}" role="status" class="thanks" tabindex="-1" data-autofocus>
+                <th:block th:if="${signupResult == 'created'}">
+                  <p class="subheading" th:text="${s.text('thanksTitle')}">ขอบคุณ</p>
+                  <p class="lead" th:text="${s.text('thanksBody')}">body</p>
+                </th:block>
+                <th:block th:if="${signupResult == 'duplicate'}">
+                  <p class="subheading">อีเมลนี้สมัครสมาชิกไว้แล้ว</p>
+                  <p class="lead">ขอบคุณที่อยู่กับเรานะ ไม่ต้องสมัครซ้ำ</p>
+                </th:block>
+              </div>
+              <form th:if="${signupResult == null}" class="stack-2" method="post" th:action="@{/signup}" novalidate
+                    data-validate data-error="ขอชื่อกับอีเมลที่ถูกต้องก่อนน้า">
+                <input type="hidden" name="source" value="home">
+                <div class="hp" aria-hidden="true">
+                  <label for="home-company">ไม่ต้องกรอกช่องนี้</label>
+                  <input id="home-company" type="text" name="company" tabindex="-1" autocomplete="off">
+                </div>
+                <div class="field">
+                  <label for="signup-name">ชื่อ</label>
+                  <input id="signup-name" class="input" type="text" name="name" autocomplete="name" required maxlength="120"
+                         th:value="${signupForm.name}" th:attr="aria-invalid=${signupErrors != null and signupErrors.containsKey('name')} ? 'true' : null">
+                </div>
+                <div class="field">
+                  <label for="signup-email">อีเมล</label>
+                  <input id="signup-email" class="input" type="email" name="email" autocomplete="email" required maxlength="254"
+                         th:value="${signupForm.email}" th:attr="aria-invalid=${signupErrors != null and signupErrors.containsKey('email')} ? 'true' : null">
+                </div>
+                <p class="caption" th:if="${!#strings.isEmpty(s.text('purpose'))}" th:text="${s.text('purpose')}">purpose</p>
+                <p class="form-error" role="alert" data-form-error th:text="${signupError}" th:hidden="${signupError == null}"></p>
+                <button class="btn" type="submit" th:text="${s.text('cta')}">รับโค้ดส่วนลด</button>
+              </form>
+            </div>
+          </div>
+        </section>
+
+      </th:block>
+    </th:block>
+  </main>
+
+  <footer th:replace="~{fragments/public :: footer}"></footer>
+</div>
+
+<!-- Catalog preview -->
+<dialog class="catalog" id="catalog" aria-labelledby="catalog-name"
+        th:attr="data-line=${site.lineUrl},data-contact=@{/contact}">
+  <div class="catalog-inner">
+    <div class="catalog-head">
+      <p class="caption">BAKBAN Catalog · <span data-counter></span></p>
+      <button class="icon-btn" type="button" data-close aria-label="ปิด">
+        <svg aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m3 3 10 10M13 3 3 13"/></svg>
+      </button>
+    </div>
+    <div class="catalog-body">
+      <div class="catalog-gallery">
+        <div class="catalog-main" data-swipe>
+          <img data-main-img src="data:," alt="">
+          <button class="icon-btn prev" type="button" data-img-prev aria-label="รูปก่อนหน้า" hidden>
+            <svg aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3 5 8l5 5"/></svg>
+          </button>
+          <button class="icon-btn next" type="button" data-img-next aria-label="รูปถัดไป" hidden>
+            <svg aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 3 5 5-5 5"/></svg>
+          </button>
+        </div>
+        <div class="thumbs" data-thumbs></div>
+      </div>
+      <div class="catalog-info">
+        <div class="stack-1">
+          <p class="eyebrow" data-brand></p>
+          <h3 class="subheading" id="catalog-name" data-name></h3>
+          <p class="catalog-price" data-price></p>
+        </div>
+        <dl class="details" data-details></dl>
+        <p class="lead pre-line" data-desc></p>
+        <a class="btn" data-cta href="#" th:text="${view.get('products').text('contactCta')}">สนใจใบนี้ ทักเลย</a>
+      </div>
+    </div>
+    <div class="catalog-foot">
+      <button class="btn-ghost" type="button" data-prod-prev>← สินค้าก่อนหน้า</button>
+      <p class="caption" aria-live="polite" data-counter></p>
+      <button class="btn-ghost" type="button" data-prod-next>สินค้าถัดไป →</button>
+    </div>
+  </div>
+</dialog>
+<script type="application/json" id="catalog-data" th:utext="${catalogJson}">[]</script>
+</body>
+</html>

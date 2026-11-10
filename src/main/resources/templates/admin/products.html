@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="th" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/admin :: head('สินค้า')}"></head>
+<body>
+<div class="admin-layout">
+  <nav th:replace="~{fragments/admin :: nav}"></nav>
+  <main class="admin-main">
+    <div class="page-head">
+      <div class="titles"><p class="eyebrow">สินค้า</p><h1 class="title">สินค้าทั้งหมด</h1></div>
+      <a class="btn" th:href="@{/admin/products/new}">+ เพิ่มสินค้า</a>
+    </div>
+    <p th:replace="~{fragments/admin :: status}"></p>
+
+    <form class="filters" method="get" th:action="@{/admin/products}">
+      <div class="field">
+        <label for="pr-search">ค้นหาชื่อหรือแบรนด์</label>
+        <input class="inp" id="pr-search" type="search" name="q" placeholder="เช่น Dior หรือ สีฟ้า" th:value="${q}">
+      </div>
+      <div class="field narrow">
+        <label for="pr-status">สถานะ</label>
+        <select class="inp" id="pr-status" name="status" data-autosubmit>
+          <option value="all" th:selected="${status == 'all'}">ทั้งหมด</option>
+          <option value="shown" th:selected="${status == 'shown'}">แสดงบนเว็บ</option>
+          <option value="hidden" th:selected="${status == 'hidden'}">ซ่อนอยู่</option>
+        </select>
+      </div>
+      <button class="btn-ghost" type="submit">ค้นหา</button>
+      <p class="caption" th:text="'แสดง ' + ${rows.size()} + ' จาก ' + ${total} + ' รายการ'">count</p>
+    </form>
+
+    <div class="table-wrap">
+      <table class="tbl">
+        <thead>
+        <tr><th scope="col">รูป</th><th scope="col">ชื่อสินค้า</th><th scope="col">แบรนด์</th><th scope="col">ราคา</th><th scope="col">สถานะ</th><th scope="col"><span class="visually-hidden">จัดการ</span></th></tr>
+        </thead>
+        <tbody>
+        <tr th:each="p : ${rows}">
+          <td><div class="thumb"><img th:if="${p.mainImage != null}" th:src="${p.mainImage.url}" alt="" loading="lazy"></div></td>
+          <td th:text="${p.name}">name</td>
+          <td th:text="${#strings.isEmpty(p.brand) ? '[ยังไม่ระบุ]' : p.brand}" th:classappend="${#strings.isEmpty(p.brand)} ? 'muted'">brand</td>
+          <td th:text="${p.priceThb == null ? 'ยังไม่ใส่ราคา' : T(com.bakban9.util.Texts).formatPrice(p.priceThb)}" th:classappend="${p.priceThb == null} ? 'muted'">price</td>
+          <td>
+            <form class="inline" method="post" th:action="@{/admin/products/{id}/visibility(id=${p.id})}">
+              <input type="hidden" name="visible" th:value="${!p.visible}">
+              <input type="hidden" name="q" th:value="${q}"><input type="hidden" name="status" th:value="${status}">
+              <button class="btn-ghost sm" type="submit" th:attr="aria-pressed=${p.visible}"
+                      th:aria-label="(${p.visible} ? 'ซ่อน ' : 'แสดง ') + ${p.name}" th:text="${p.visible} ? 'แสดง' : 'ซ่อน'">แสดง</button>
+            </form>
+          </td>
+          <td>
+            <div class="actions">
+              <a class="btn-ghost sm" th:href="@{/admin/products/{id}(id=${p.id})}" th:aria-label="'แก้ไข ' + ${p.name}">แก้ไข</a>
+              <form class="inline" method="post" th:action="@{/admin/products/{id}/delete(id=${p.id})}"
+                    th:attr="data-confirm='ลบ ' + ${p.name} + ' ? สินค้าจะหายจากหน้าเว็บทันที'">
+                <button class="btn-ghost sm" type="submit" th:aria-label="'ลบ ' + ${p.name}">ลบ</button>
+              </form>
+            </div>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+      <p class="empty" th:if="${rows.isEmpty()}">ไม่พบสินค้าที่ตรงกับการค้นหา</p>
+    </div>
+  </main>
+</div>
+</body>
+</html>

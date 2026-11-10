@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="th" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ไม่พบหน้านี้ · BAKBAN</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Mitr:wght@500&amp;family=Prompt:wght@400;500&amp;display=swap">
+  <link rel="stylesheet" th:href="@{/css/tokens.css}"><link rel="stylesheet" th:href="@{/css/public.css}">
+</head>
+<body>
+<main class="container error-page">
+  <p class="eyebrow">404</p>
+  <h1 class="page-title">ไม่พบหน้านี้</h1>
+  <p class="lead">ลิงก์อาจไม่ถูกต้อง หรือหน้านี้ถูกปิดไปแล้ว</p>
+  <a class="btn" th:href="@{/}">กลับหน้าแรก</a>
+</main>
+</body>
+</html>

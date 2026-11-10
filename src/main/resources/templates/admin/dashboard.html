@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="th" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/admin :: head('ภาพรวม')}"></head>
+<body>
+<div class="admin-layout">
+  <nav th:replace="~{fragments/admin :: nav}"></nav>
+  <main class="admin-main">
+    <div class="page-head">
+      <div class="titles">
+        <p class="eyebrow" th:text="'สวัสดี ' + ${me.name}">สวัสดี</p>
+        <h1 class="title">ภาพรวมเว็บไซต์</h1>
+      </div>
+      <div class="actions">
+        <a class="btn-ghost" th:href="@{/}" target="_blank" rel="noopener">ดูหน้าเว็บ</a>
+        <a class="btn" th:href="@{/admin/products/new}">+ เพิ่มสินค้า</a>
+      </div>
+    </div>
+    <p th:replace="~{fragments/admin :: status}"></p>
+
+    <div class="stats">
+      <a th:each="s : ${stats}" class="stat" th:href="${s.href}">
+        <span class="caption" th:text="${s.label}">label</span>
+        <span class="value" th:text="${s.value}">0</span>
+        <span class="caption" th:text="${s.note}">note</span>
+      </a>
+    </div>
+
+    <div class="row-wrap">
+      <section class="panel grow-3" aria-labelledby="todo-h">
+        <div class="list-row">
+          <h2 id="todo-h" class="sub">งานที่ต้องทำก่อนเปิดเว็บ</h2>
+          <span class="caption" th:text="${todos.size()} + ' รายการ'">0</span>
+        </div>
+        <a th:each="t : ${todos}" class="todo" th:href="${t.href}">
+          <span class="lbl"><span class="box" aria-hidden="true"></span><span th:text="${t.label}">todo</span></span>
+          <span class="caption" th:text="${t.where} + ' →'">where</span>
+        </a>
+        <p th:if="${todos.isEmpty()}" class="muted">ข้อมูลครบแล้ว พร้อมเปิดเว็บ</p>
+      </section>
+
+      <section class="grow-2 stack-3">
+        <div class="panel">
+          <h2 class="sub">หน้าเว็บทั้งหมด</h2>
+          <div th:each="p : ${pages}" class="list-row">
+            <div class="stack-1">
+              <span class="h3 small" th:text="${p.title}">หน้า</span>
+              <span class="caption" th:text="${p.published} ? 'เผยแพร่แล้ว' : 'ปิดอยู่'">สถานะ</span>
+            </div>
+            <a class="btn-ghost sm" th:href="@{/admin/pages(page=${p.slug})}" th:aria-label="'แก้ไข ' + ${p.title}">แก้ไข</a>
+          </div>
+        </div>
+        <div class="panel">
+          <h2 class="sub">ข้อความล่าสุด</h2>
+          <p th:if="${latest.isEmpty()}" class="muted">ยังไม่มีข้อความ ข้อความจากหน้าติดต่อเราจะขึ้นที่นี่</p>
+          <a th:each="m : ${latest}" class="msg-item" th:href="@{/admin/messages(id=${m.id})}">
+            <span class="top"><span th:text="${m.name}">name</span><span class="badge" th:classappend="${m.replied} ? '' : 'solid'" th:text="${m.replied} ? 'ตอบแล้ว' : 'ยังไม่ตอบ'"></span></span>
+            <span class="caption" th:text="${#strings.isEmpty(m.subject) ? '(ไม่มีหัวข้อ)' : m.subject}">subject</span>
+          </a>
+          <a th:href="@{/admin/messages}">ไปที่กล่องข้อความ →</a>
+        </div>
+      </section>
+    </div>
+  </main>
+</div>
+</body>
+</html>
