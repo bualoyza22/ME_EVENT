@@ -21,10 +21,12 @@
 
 ## เริ่มใช้งาน
 
+ต้องมี Java 21 และ Docker (หรือ PostgreSQL 16) ไม่ต้องติดตั้ง Maven เพราะ `./mvnw` จะดาวน์โหลด Maven ที่ตรงเวอร์ชันมาให้เอง
+
 ```bash
 docker compose up -d postgres          # หรือใช้ PostgreSQL ที่มีอยู่แล้ว
 export OWNER_EMAIL=you@example.com OWNER_PASSWORD='อย่างน้อย-8-ตัว' SESSION_COOKIE_SECURE=false
-mvn spring-boot:run
+./mvnw spring-boot:run        # Windows: mvnw.cmd spring-boot:run
 ```
 
 เปิด http://localhost:8080 และ http://localhost:8080/admin
@@ -36,7 +38,7 @@ mvn spring-boot:run
 ### รันเทสต์
 
 ```bash
-mvn test        # ใช้ฐานข้อมูล bakban9_test (เปลี่ยนได้ด้วย TEST_DATABASE_URL)
+./mvnw test      # ใช้ฐานข้อมูล bakban9_test (เปลี่ยนได้ด้วย TEST_DATABASE_URL)
 ```
 
 `docker compose` จะสร้างฐานข้อมูล `bakban9_test` ให้อัตโนมัติ ส่วน CI ใน `.github/workflows/ci.yml` จะรันเทสต์กับ PostgreSQL service
